@@ -114,7 +114,7 @@ class EmailVerificationTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # expected one email to be send
         self.assertEqual(len(mail.outbox), 1)
-        
+
         # parse email to get uid and token
         email_lines = mail.outbox[0].body.splitlines()
         # you can print email to check it
@@ -122,7 +122,7 @@ class EmailVerificationTest(APITestCase):
         # print(mail.outbox[0].body)
         activation_link = [l for l in email_lines if "/activate/" in l][0]
         uid, token = activation_link.split("/")[-2:]
-        
+
         # verify email
         data = {"uid": uid, "token": token}
         response = self.client.post(self.activate_url, data, format="json")
@@ -134,7 +134,7 @@ class EmailVerificationTest(APITestCase):
         token = response.json()["auth_token"]
 
         # set token in the header
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
         # get user details
         response = self.client.get(self.user_details_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -157,7 +157,7 @@ class EmailVerificationTest(APITestCase):
         token = response.json()["auth_token"]
 
         # set token in the header
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
         # try to get user details
         response = self.client.get(self.user_details_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -168,7 +168,7 @@ class EmailVerificationTest(APITestCase):
         data = {"email": self.user_data["email"]}
         response = self.client.post(self.resend_verification_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        
+
         # there should be two emails in the outbox
         self.assertEqual(len(mail.outbox), 2)
 
@@ -176,7 +176,7 @@ class EmailVerificationTest(APITestCase):
         email_lines = mail.outbox[1].body.splitlines()
         activation_link = [l for l in email_lines if "/activate/" in l][0]
         uid, token = activation_link.split("/")[-2:]
-        
+
         # verify the email
         data = {"uid": uid, "token": token}
         response = self.client.post(self.activate_url, data, format="json")
